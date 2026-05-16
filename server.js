@@ -1,13 +1,33 @@
 const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+// Importation de nos modules et algorithmes séparés
+const authController = require('./controllers/authController');
+const verifyToken = require('./middleware/authMiddleware');
+
 const app = express();
-const http = require('http')
-const PORT = 3000;
-var httpServer = http.createServer(function(req, res){
-    res.writeHead(200,'Content-Type','text/html');
-    res.end("<h1>Voici votre premier teste sur le node</h1><br><p>Inspirer bien votre inspiration pour que cela marche bien !</p>")
-})
+
+// Middlewares globaux
+app.use(cors());
 app.use(express.json());
-app.listen(PORT, function(){
-    console.log("Message envoyer dans le port de http://localhost:3000");
-}
-);
+
+// --- ROUTES ---
+
+// Routes Publiques (Accessibles sans token)
+app.post('/api/register', authController.register);
+app.post('/api/login', authController.login);
+
+// Route Protégée (Le middleware "verifyToken" bloque l'accès si pas de token valide)
+app.get('/api/dashboard', verifyToken, (req, res) => {
+    // Si on arrive ici, c'est que verifyToken a fait "next()"
+    res.json({ 
+        secretData: `Bienvenue ${req.user.email} ! Voici tes données sécurisées provenant du serveur.` 
+    });
+});
+
+// Démarrage du serveur via le port du fichier .env
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Serveur démarré et segmenté sur le port ${PORT}`);
+});
