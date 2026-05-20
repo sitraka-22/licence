@@ -9,7 +9,7 @@ const register = async (req, res) => {
 
     try {
         // 1. Vérifier si l'utilisateur existe déjà
-        const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const userExists = await pool.query('SELECT * FROM utilisateur WHERE email = $1', [email]);
         if (userExists.rows.length > 0) {
             return res.status(400).json({ message: "Cet email est déjà utilisé." });
         }
@@ -19,7 +19,7 @@ const register = async (req, res) => {
 
         // 3. Insérer en base de données
         const newUser = await pool.query(
-            'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
+            'INSERT INTO utilisateur (email, password) VALUES ($1, $2) RETURNING id, email',
             [email, hashedPassword]
         );
 
@@ -39,7 +39,7 @@ const login = async (req, res) => {
 
     try {
         // 1. Chercher l'utilisateur
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await pool.query('SELECT * FROM utilisateur WHERE email = $1', [email]);
         const user = result.rows[0];
 
         if (!user) {
