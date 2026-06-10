@@ -39,16 +39,19 @@ const login = async (req, res) => {
 
     try {
         // 1. Chercher l'utilisateur
+        console.log(`[Login Attempt] Tentative de connexion pour : ${email}`);
         const result = await pool.query('SELECT * FROM utilisateur WHERE email = $1', [email]);
         const user = result.rows[0];
 
         if (!user) {
+            console.log(`[Login Failed] Utilisateur non trouvé : ${email}`);
             return res.status(400).json({ message: "Identifiants incorrects." });
         }
 
         // 2. Vérifier le mot de passe
-        const isMatch = await compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            console.log(`[Login Failed] Mot de passe incorrect pour : ${email}`);
             return res.status(400).json({ message: "Identifiants incorrects." });
         }
 
@@ -59,6 +62,7 @@ const login = async (req, res) => {
             { expiresIn: '1h' }
         );
 
+        console.log(`[Login Success] Connexion réussie pour : ${email}`);
         res.json({ token, message: "Connexion réussie !" });
     } catch (error) {
         console.error(error);
