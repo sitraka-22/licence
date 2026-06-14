@@ -1,10 +1,10 @@
 // src/controllers/demandeController.js
-import pool from '../config/db.js';
+const pool = require('../config/db.js');
 
 // [POST] : Soumettre une demande depuis le terrain
 // Structure req.body : { "titre_demande": "Besoin de ciment", "description": "50 sacs", "id_projet": 2, "id_employe": 1 }
 // Note : req.user.id vient du middleware JWT (l'utilisateur connecté)
-export const createDemande = async (req, res) => {
+const createDemande = async (req, res) => {
     const { titre_demande, description, id_projet, id_employe } = req.body;
     const id_utilisateur = req.user.id; 
     try {
@@ -20,7 +20,7 @@ export const createDemande = async (req, res) => {
 
 // [GET] : Voir toutes les demandes avec détails (Qui demande, et sur quel chantier ?)
 // Structure URL : GET /api/demandes
-export const getAllDemandes = async (req, res) => {
+const getAllDemandes = async (req, res) => {
     try {
         const query = `
             SELECT d.*, p.nom_projet, e.nom as nom_employe, u.email as email_demandeur
@@ -39,7 +39,7 @@ export const getAllDemandes = async (req, res) => {
 // [PATCH] : Approuver ou Refuser une demande (Action des bureaux administratifs)
 // Structure req.params : id (id_demande dans l'URL)
 // Structure req.body : { "statut": "Approuve" } (En_attente, Approuve, Refuse)
-export const traiterDemande = async (req, res) => {
+const traiterDemande = async (req, res) => {
     const { id } = req.params;
     const { statut } = req.body;
     try {
@@ -54,7 +54,7 @@ export const traiterDemande = async (req, res) => {
 
 // [DELETE] : Annuler une demande
 // Structure req.params : id
-export const deleteDemande = async (req, res) => {
+const deleteDemande = async (req, res) => {
     const { id } = req.params;
     try {
         const result = await pool.query('DELETE FROM demandes WHERE id_demande = $1 RETURNING *', [id]);
@@ -63,4 +63,10 @@ export const deleteDemande = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+module.exports = {
+    createDemande,
+    getAllDemandes,
+    traiterDemande,
+    deleteDemande
 };

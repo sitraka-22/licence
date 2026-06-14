@@ -1,9 +1,9 @@
 // src/controllers/employeController.js
-import pool from '../config/db.js';
+const pool = require('../config/db.js');
 
 // [POST] : Embaucher / Enregistrer un nouvel employé
 // Structure req.body : { "nom": "Ranaivo", "prenom": "Jean", "telephone": "0340000000", "poste": "Chef_Chantier", "salaire_journalier": 75000, "id_projet": 1, "id_utilisateur": null }
-export const createEmploye = async (req, res) => {
+const createEmploye = async (req, res) => {
     const { nom, prenom, telephone, poste, salaire_journalier, id_projet, id_utilisateur } = req.body;
     try {
         const query = `
@@ -17,14 +17,32 @@ export const createEmploye = async (req, res) => {
 };
 
 // [GET] : Obtenir la liste complète des employés avec leur chantier actuel
-export const getAllEmployes = async (req, res) => {
+const getAllEmployes = async (req, res) => {
     try {
-        const query = `
+        const { poste, id_projet } = req.query;
+        let query = `
             SELECT e.*, p.nom_projet 
             FROM employes e
             LEFT JOIN projets p ON e.id_projet = p.id_projet
-            ORDER BY e.id_employe DESC`;
-        const result = await pool.query(query);
+            WHERE 1=1
+        `;
+        const params = [];
+
+        // Filtre par poste si présent
+        if (poste) {
+            params.push(poste);
+            query += ` AND e.poste = $${params.length}`;
+        }
+
+        // Filtre par projet si présent
+        if (id_projet) {
+            params.push(id_projet);
+            query += ` AND e.id_projet = $${params.length}`;
+        }
+
+        query += ` ORDER BY e.id_employe DESC`;
+
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -34,7 +52,7 @@ export const getAllEmployes = async (req, res) => {
 // [PATCH] : Transférer un employé vers un autre chantier (Changement d'équipe)
 // Structure req.params : id (id_employe)
 // Structure req.body : { "id_projet": 3 }
-export const changerChantierEmploye = async (req, res) => {
+const changerChantierEmploye = async (req, res) => {
     const { id } = req.params;
     const { id_projet } = req.body;
     try {
@@ -48,7 +66,7 @@ export const changerChantierEmploye = async (req, res) => {
 };
 
 // [DELETE] : Retirer un employé des effectifs (Licenciement / Fin de contrat)
-export const deleteEmploye = async (req, res) => {
+const deleteEmploye = async (req, res) => {
     const { id } = req.params;
     try {
         const result = await pool.query('DELETE FROM employes WHERE id_employe = $1 RETURNING *', [id]);
@@ -57,4 +75,10 @@ export const deleteEmploye = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+};
+module.exports = {
+    createEmploye,
+    getAllEmployes,
+    changerChantierEmploye,
+    deleteEmploye
 };

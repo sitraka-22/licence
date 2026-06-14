@@ -4,7 +4,9 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const projetRoutes = require("./routes/projetRoutes");
-
+const employeRouter = require("./routes/employeRoutes");
+const demandeRoutes = require('./routes/demandeRoutes');
+const ressourceRoutes = require("./routes/ressourceRoutes");
 const verifyToken = require("./middleware/authMiddleware");
 
 const app = express();
@@ -23,6 +25,12 @@ app.use("/api/auth", authRoutes);
 
 // Toutes les routes des projets seront préfixées par /api/projets
 app.use("/api/projets", projetRoutes);
+
+app.use('/api/employes', employeRouter);
+
+app.use('/api/ressources', ressourceRoutes);
+
+app.use('/api/demandes', demandeRoutes);
 
 // --- ROUTE PROTÉGÉE DIRECTE ---
 app.get("/api/dashboard", verifyToken, (req, res) => {
