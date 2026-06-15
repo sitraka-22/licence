@@ -19,4 +19,5 @@ pool.connect((err, client, release) => {
 });
 //bomboclate 
 //lobs
+//kimaso
 module.exports = pool;
