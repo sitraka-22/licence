@@ -17,5 +17,6 @@ pool.connect((err, client, release) => {
     console.log('Connecté avec succès à la base de données PostgreSQL ianao !');
     release();
 });
-
+//bomboclate 
+//lobs
 module.exports = pool;
