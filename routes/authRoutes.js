@@ -4,6 +4,6 @@ const authController = require('../controllers/authController');
 const verifyToken = require('../middleware/authMiddleware');
 
 router.post('/login', authController.login);
-router.post('/register',verifyToken, authController.register);
+router.post('/register', authController.register); // ← verifyToken retiré
 
 module.exports = router;
