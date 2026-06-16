@@ -7,6 +7,6 @@ const verifyToken = require('../middleware/authMiddleware'); // Ton middleware d
 router.post('/', verifyToken, projetController.creerProjet);
 router.get('/', verifyToken, projetController.obtenirTousLesProjets);
 router.delete('/:id', verifyToken, projetController.softDeleteProjet);
-router.put('/:id/restaurer', verifyToken, projetController.restaurerProjet);
+router.patch('/:id/restaurer', verifyToken, projetController.restaurerProjet);
 
 module.exports = router;

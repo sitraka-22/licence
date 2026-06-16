@@ -1,3 +1,4 @@
+
 const pool = require('../config/db');
 
 // 1. CRÉER UN PROJET (Pont, Bâtiment, Route)
@@ -34,7 +35,7 @@ const obtenirTousLesProjets = async (req, res) => {
         // On ne prend que les projets où is_deleted = false
         const query = `SELECT * FROM projets WHERE is_deleted = false ORDER BY id_projet DESC;`;
         const { rows } = await pool.query(query);
-        
+
         res.status(200).json(rows);
     } catch (error) {
         console.error("Erreur obtenirTousLesProjets:", error);
@@ -59,9 +60,9 @@ const softDeleteProjet = async (req, res) => {
             return res.status(404).json({ message: "Projet introuvable ou déjà supprimé." });
         }
 
-        res.status(200).json({ 
-            message: "Projet déplacé dans la corbeille avec succès.", 
-            projet: rows[0] 
+        res.status(200).json({
+            message: "Projet déplacé dans la corbeille avec succès.",
+            projet: rows[0]
         });
     } catch (error) {
         console.error("Erreur softDeleteProjet:", error);
@@ -86,9 +87,9 @@ const restaurerProjet = async (req, res) => {
             return res.status(404).json({ message: "Projet introuvable dans la corbeille." });
         }
 
-        res.status(200).json({ 
-            message: "Projet restauré avec succès !", 
-            projet: rows[0] 
+        res.status(200).json({
+            message: "Projet restauré avec succès !",
+            projet: rows[0]
         });
     } catch (error) {
         console.error("Erreur restaurerProjet:", error);
