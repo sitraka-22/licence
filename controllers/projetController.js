@@ -1,11 +1,9 @@
-
 const pool = require('../config/db');
 
-// 1. CRÉER UN PROJET (Pont, Bâtiment, Route)
+// 1. CRÉER UN PROJET
 const creerProjet = async (req, res) => {
     const { nom_projet, description, type, date_debut, date_fin_prevue, budget } = req.body;
 
-    // Validation de sécurité basique
     if (!nom_projet || !type) {
         return res.status(400).json({ message: "Le nom du projet et le type sont obligatoires." });
     }
@@ -29,23 +27,21 @@ const creerProjet = async (req, res) => {
     }
 };
 
-// 2. LIRE TOUS LES PROJECTIONS ACTIFS (Ceux qui ne sont pas dans la corbeille)
+// 2. LIRE TOUS LES PROJETS (actifs + corbeille)
 const obtenirTousLesProjets = async (req, res) => {
     try {
-        // On ne prend que les projets où is_deleted = false
-        const query = `SELECT * FROM projets WHERE is_deleted = false ORDER BY id_projet DESC;`;
+        const query = `SELECT * FROM projets ORDER BY id_projet DESC;`;
         const { rows } = await pool.query(query);
-
         res.status(200).json(rows);
     } catch (error) {
         console.error("Erreur obtenirTousLesProjets:", error);
         res.status(500).json({ message: "Erreur lors de la récupération des projets." });
     }
-}
+};
 
 // 3. ENVOYER UN PROJET À LA CORBEILLE (Soft Delete)
 const softDeleteProjet = async (req, res) => {
-    const { id } = req.params; // Récupère l'id_projet depuis l'URL
+    const { id } = req.params;
 
     try {
         const query = `
@@ -70,7 +66,7 @@ const softDeleteProjet = async (req, res) => {
     }
 };
 
-// 4. RESTAURER UN PROJET DE LA CORBEILLE (Récupération)
+// 4. RESTAURER UN PROJET DE LA CORBEILLE
 const restaurerProjet = async (req, res) => {
     const { id } = req.params;
 
@@ -97,9 +93,33 @@ const restaurerProjet = async (req, res) => {
     }
 };
 
+// 5. SUPPRESSION DÉFINITIVE
+const supprimerDefinitivement = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const query = `
+            DELETE FROM projets 
+            WHERE id_projet = $1 AND is_deleted = true
+            RETURNING *;
+        `;
+        const { rows } = await pool.query(query, [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Projet introuvable dans la corbeille." });
+        }
+
+        res.status(200).json({ message: "Projet supprimé définitivement." });
+    } catch (error) {
+        console.error("Erreur supprimerDefinitivement:", error);
+        res.status(500).json({ message: "Erreur lors de la suppression définitive." });
+    }
+};
+
 module.exports = {
     creerProjet,
     obtenirTousLesProjets,
     softDeleteProjet,
-    restaurerProjet
+    restaurerProjet,
+    supprimerDefinitivement
 };
