@@ -92,6 +92,37 @@ const restaurerProjet = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la restauration du projet." });
     }
 };
+const modifierProjet = async (req, res) => {
+    const { id } = req.params;
+    const { nom_projet, description, type, date_debut, date_fin_prevue, budget } = req.body;
+
+    if (!nom_projet || !type) {
+        return res.status(400).json({ message: "Le nom du projet et le type sont obligatoires." });
+    }
+
+    try {
+        const query = `
+            UPDATE projets 
+            SET nom_projet = $1, description = $2, type = $3, date_debut = $4, date_fin_prevue = $5, budget = $6
+            WHERE id_projet = $7 AND is_deleted = false
+            RETURNING *;
+        `;
+        const valeurs = [nom_projet, description, type, date_debut, date_fin_prevue, budget, id];
+        const { rows } = await pool.query(query, valeurs);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Projet introuvable ou archivé dans la corbeille." });
+        }
+
+        res.status(200).json({
+            message: "Projet mis à jour avec succès !",
+            projet: rows[0]
+        });
+    } catch (error) {
+        console.error("Erreur modifierProjet:", error);
+        res.status(500).json({ message: "Erreur lors de la mise à jour du projet.", error: error.message });
+    }
+};
 
 // 5. SUPPRESSION DÉFINITIVE
 const supprimerDefinitivement = async (req, res) => {
@@ -121,5 +152,6 @@ module.exports = {
     obtenirTousLesProjets,
     softDeleteProjet,
     restaurerProjet,
-    supprimerDefinitivement
+    supprimerDefinitivement,
+    modifierProjet
 };
