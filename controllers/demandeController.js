@@ -3,7 +3,7 @@ const pool = require('../config/db.js');
 // [POST] Créer une demande
 const createDemande = async (req, res) => {
     const { titre_demande, description, id_projet, id_employe } = req.body;
-    const id_utilisateur = req.user.id;
+    const id_utilisateur = req.user.userId;
     try {
         const query = `
             INSERT INTO demandes (titre_demande, description, id_projet, id_utilisateur, id_employe) 
@@ -14,7 +14,7 @@ const createDemande = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
+//lost gun
 // [GET] Toutes les demandes actives (is_delete = false)
 const getAllDemandes = async (req, res) => {
     try {
